@@ -7,8 +7,14 @@ namespace Models.entities
     [Table(nameof(Product))]
     public class Product
     {
+        public Product()
+        {
+            Id = Guid.NewGuid();
+        }
+
+
         [Key]
-        public Guid ProdutoId { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         [StringLength(100)]

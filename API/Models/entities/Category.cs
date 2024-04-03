@@ -12,6 +12,7 @@ namespace Models.entities
 
         public Category()
         {
+            Id = Guid.NewGuid();
             Products = new Collection<Product>();
         }
 
