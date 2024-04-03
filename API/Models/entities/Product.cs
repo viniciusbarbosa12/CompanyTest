@@ -1,20 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Models.Utils;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace Models.entities
 {
     [Table(nameof(Product))]
-    public class Product
+    public class Product : BaseEntity
     {
         public Product()
         {
-            Id = Guid.NewGuid();
         }
 
-
-        [Key]
-        public Guid Id { get; set; }
 
         [Required]
         [StringLength(100)]
@@ -28,8 +25,6 @@ namespace Models.entities
         [Required]
         [Column(TypeName = "decimal(10,2)")]
         public decimal Price { get; set; }
-
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         public Guid CategoryId { get; set; }
 

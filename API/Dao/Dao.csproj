@@ -22,4 +22,9 @@
     <ProjectReference Include="..\Models\Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Repositories\Category\" />
+    <Folder Include="Repositories\Products\" />
+  </ItemGroup>
+
 </Project>

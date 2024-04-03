@@ -19,26 +19,41 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> Get()
         {
-            var products = await _context.Products.ToListAsync();
+            try
+            {
+                var products = await _context.Products.AsNoTracking().ToListAsync();
 
-            if (products == null || products.Count == 0)
-                return NotFound();
+                if (products == null || products.Count == 0)
+                    return NotFound();
 
 
-            return Ok(products);
+                return Ok(products);
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred: " + ex.Message);
+            }
         }
 
 
         [HttpGet("{id}")]
         public async Task<ActionResult<IEnumerable<Product>>> GetById(Guid id)
         {
-            var products = await _context.Products.FirstOrDefaultAsync(item => item.Id.Equals(id));
+            try
+            {
+                var products = await _context.Products.AsNoTracking().FirstOrDefaultAsync(item => item.Id.Equals(id));
 
-            if (products == null)
-                return NotFound();
+                if (products == null)
+                    return NotFound();
 
 
-            return Ok(products);
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred: " + ex.Message);
+            }
         }
 
 
@@ -48,41 +63,58 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Product>> Create(Product product)
         {
-            if (product == null)
+            try
             {
-                return BadRequest("Category data is null.");
+                if (product == null)
+                {
+                    return BadRequest("Category data is null.");
+                }
+
+                await _context.Products.AddAsync(product);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+
             }
-
-            await _context.Products.AddAsync(product);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred: " + ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, Product product)
         {
-            if (id == Guid.Empty || product == null)
+            try
             {
-                return BadRequest("Invalid id or category data.");
+                if (id == Guid.Empty || product == null)
+                {
+                    return BadRequest("Invalid id or category data.");
+                }
+
+                var existingProduct = await _context.Products.FirstOrDefaultAsync(c => c.Id == id);
+
+                if (existingProduct == null)
+                {
+                    return NotFound($"Category with id {id} not found.");
+                }
+
+                existingProduct.Name = product.Name;
+                existingProduct.Price = product.Price;
+                existingProduct.Description = product.Description;
+                existingProduct.CategoryId = product.CategoryId;
+
+                _context.Products.Update(existingProduct);
+                await _context.SaveChangesAsync();
+
+                return Ok(existingProduct);
+
+
             }
-
-            var existingProduct = await _context.Products.FirstOrDefaultAsync(c => c.Id == id);
-
-            if (existingProduct == null)
+            catch (Exception ex)
             {
-                return NotFound($"Category with id {id} not found.");
+                return StatusCode(500, "An error occurred: " + ex.Message);
             }
-
-            existingProduct.Name = product.Name;
-            existingProduct.Price = product.Price;
-            existingProduct.Description = product.Description;
-            existingProduct.CategoryId = product.CategoryId;
-
-            _context.Products.Update(existingProduct);
-            await _context.SaveChangesAsync();
-
-            return Ok(existingProduct);
         }
     }
 }

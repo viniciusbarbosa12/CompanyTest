@@ -4,6 +4,7 @@ using Dao.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Dao.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240403021348_AddMyBaseProperties")]
+    partial class AddMyBaseProperties
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,7 +34,7 @@ namespace Dao.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("Code")
+                    b.Property<string>("Codigo")
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("varchar(300)");
@@ -68,6 +71,9 @@ namespace Dao.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("DeletedAt")

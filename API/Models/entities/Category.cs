@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using Models.Utils;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
@@ -7,18 +8,13 @@ namespace Models.entities
 {
 
     [Table(nameof(Category))]
-    public class Category
+    public class Category : BaseEntity
     {
 
         public Category()
         {
-            Id = Guid.NewGuid();
             Products = new Collection<Product>();
         }
-
-        [Key]
-        public Guid Id { get; set; }
-
 
         [Required]
         [StringLength(100)]
@@ -26,7 +22,7 @@ namespace Models.entities
         
         [Required]
         [StringLength(300)]
-        public string? Codigo { get; set; }
+        public string? Code { get; set; }
 
         [JsonIgnore]
         public ICollection<Product> Products { get; set; }
