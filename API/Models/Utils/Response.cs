@@ -12,14 +12,12 @@ namespace Models.Utils
 
         public string Message { get; internal set; }
 
-        public Exception? Exception { get; internal set; }
 
         public IEnumerable<string> Validates { get; }
 
         public Response()
         {
             IsOk = true;
-            Exception = null;
             Message = "Operation completed successfully";
             Validates = new ReadOnlyCollection<string>(messages);
         }
@@ -47,7 +45,6 @@ namespace Models.Utils
         public Response(Exception erro) : this()
         {
             IsOk = false;
-            Exception = erro;
         }
 
         public Response AddError(string message)

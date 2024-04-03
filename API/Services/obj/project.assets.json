@@ -886,6 +886,33 @@
         "build": {
           "buildTransitive/netcoreapp3.1/_._": {}
         }
+      },
+      "Dao/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "Models": "1.0.0",
+          "Pomelo.EntityFrameworkCore.MySql": "8.0.2"
+        },
+        "compile": {
+          "bin/placeholder/Dao.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Dao.dll": {}
+        }
+      },
+      "Models/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "Pomelo.EntityFrameworkCore.MySql": "8.0.2"
+        },
+        "compile": {
+          "bin/placeholder/Models.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Models.dll": {}
+        }
       }
     }
   },
@@ -2338,12 +2365,24 @@
         "system.threading.channels.nuspec",
         "useSharedDesignerContext.txt"
       ]
+    },
+    "Dao/1.0.0": {
+      "type": "project",
+      "path": "../Dao/Dao.csproj",
+      "msbuildProject": "../Dao/Dao.csproj"
+    },
+    "Models/1.0.0": {
+      "type": "project",
+      "path": "../Models/Models.csproj",
+      "msbuildProject": "../Models/Models.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net8.0": [
+      "Dao >= 1.0.0",
       "Microsoft.EntityFrameworkCore.Design >= 8.0.3",
       "Microsoft.EntityFrameworkCore.Tools >= 8.0.3",
+      "Models >= 1.0.0",
       "Newtonsoft.Json >= 13.0.3",
       "Pomelo.EntityFrameworkCore.MySql >= 8.0.2"
     ]
@@ -2374,7 +2413,14 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\vinic\\OneDrive\\Documents\\Projetos\\Dotnet\\CompanyTest\\API\\Dao\\Dao.csproj": {
+              "projectPath": "C:\\Users\\vinic\\OneDrive\\Documents\\Projetos\\Dotnet\\CompanyTest\\API\\Dao\\Dao.csproj"
+            },
+            "C:\\Users\\vinic\\OneDrive\\Documents\\Projetos\\Dotnet\\CompanyTest\\API\\Models\\Models.csproj": {
+              "projectPath": "C:\\Users\\vinic\\OneDrive\\Documents\\Projetos\\Dotnet\\CompanyTest\\API\\Models\\Models.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

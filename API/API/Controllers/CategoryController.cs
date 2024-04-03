@@ -1,8 +1,11 @@
 ﻿using Dao.Context;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Models.DTO;
 using Models.entities;
+using Models.Utils;
 using Newtonsoft.Json.Linq;
+using Services.CategoryService;
 
 namespace API.Controllers
 {
@@ -10,22 +13,22 @@ namespace API.Controllers
     [Route("[controller]")]
     public class CategoryController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly CategoryService service;
 
-        public CategoryController(AppDbContext context)
+        public CategoryController(CategoryService service)
         {
-            this._context = context;
+            this.service = service;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> Get()
+        public async Task<ActionResult<Response>> Get()
         {
             try
             {
-                var categories = await _context.Categories.AsNoTracking().ToListAsync();
+                var categories = await service.GetAll();
 
-                if (categories == null || categories.Count == 0)
-                    return NotFound();
+                if (!categories.IsOk)
+                    return NotFound(categories);
 
 
                 return Ok(categories);
@@ -34,22 +37,40 @@ namespace API.Controllers
             {
                 return StatusCode(500, "An error occurred: " + ex.Message);
             }
+        }
 
+
+        [HttpPost("getAllPaginated")]
+        public async Task<ActionResult<Response>> Get(Pagination pagination)
+        {
+            try
+            {
+                var categories = await service.GetAllPaginated(pagination);
+
+                if (!categories.IsOk)
+                    return NotFound(categories);
+
+                return Ok(categories);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred: " + ex.Message);
+            }
         }
 
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<Category>>> GetById(Guid id)
+        public async Task<ActionResult<Response>> GetById(Guid id)
         {
             try
             {
-                var categories = await _context.Categories.AsNoTracking().FirstOrDefaultAsync(item => item.Id.Equals(id));
+                var categoriy = await service.GetById(id);
 
-                if (categories == null)
+                if (categoriy == null)
                     return NotFound();
 
 
-                return Ok(categories);
+                return Ok(categoriy);
             }
             catch (Exception ex)
             {
@@ -58,27 +79,27 @@ namespace API.Controllers
         }
 
 
-        [HttpGet("products/{id}")]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesWithProducts(Guid id)
-        {
-            try
-            {
-                var categories = _context.Categories.AsNoTracking().Include(p => p.Products).Where(item => item.Id.Equals(id)).ToListAsync();
+        //[HttpGet("products/{id}")]
+        //public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesWithProducts(Guid id)
+        //{
+        //    try
+        //    {
+        //        var categories = _context.Categories.AsNoTracking().Include(p => p.Products).Where(item => item.Id.Equals(id)).ToListAsync();
 
-                if (categories == null)
-                    return NotFound();
+        //        if (categories == null)
+        //            return NotFound();
 
 
-                return Ok(categories);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "An error occurred: " + ex.Message);
-            }
-        }
+        //        return Ok(categories);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, "An error occurred: " + ex.Message);
+        //    }
+        //}
 
         [HttpPost]
-        public async Task<ActionResult<Category>> Create(Category category)
+        public async Task<ActionResult<Response>> Create(CategoryDTO category)
         {
             try
             {
@@ -87,10 +108,9 @@ namespace API.Controllers
                     return BadRequest("Category data is null.");
                 }
 
-                await _context.Categories.AddAsync(category);
-                await _context.SaveChangesAsync();
+                var result = await service.Create(category);
 
-                return CreatedAtAction(nameof(GetById), new { id = category.Id }, category);
+                return CreatedAtAction(nameof(GetById), new { result.Result }, result);
             }
             catch (Exception ex)
             {
@@ -98,30 +118,19 @@ namespace API.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, Category category)
+        [HttpPut]
+        public async Task<ActionResult<Response>> Update(CategoryDTO categoryDto)
         {
             try
             {
-                if (id == Guid.Empty || category == null)
+                if (categoryDto.Id == Guid.Empty || categoryDto == null)
                 {
                     return BadRequest("Invalid id or category data.");
                 }
 
-                var existingCategory = await _context.Categories.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+                var result = await service.Update(categoryDto);
 
-                if (existingCategory == null)
-                {
-                    return NotFound($"Category with id {id} not found.");
-                }
-
-                existingCategory.Name = category.Name;
-                existingCategory.Code = category.Code;
-
-                _context.Categories.Update(existingCategory);
-                await _context.SaveChangesAsync();
-
-                return Ok(existingCategory);
+                return Ok(result);
             }
             catch (Exception ex)
             {
