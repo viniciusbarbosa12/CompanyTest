@@ -1,0 +1,23 @@
+﻿using Dao.Config;
+using Models.DTO;
+using Models.entities;
+using Models.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Services.CategoryService
+{
+    public interface ICategoryService
+    {
+        Task<Response> GetAll();
+        Task<Response> GetAllPaginated(Pagination pagination);
+        Task<Response> GetById(Guid id);
+        Task<Response> Create(CategoryDTO categoryDTO);
+        Task<Response> Update(CategoryDTO categoryDTO);
+        Task<Response> Delete(CategoryDTO categoryDTO);
+
+    }
+}

@@ -13,9 +13,9 @@ namespace API.Controllers
     [Route("[controller]")]
     public class CategoryController : ControllerBase
     {
-        private readonly CategoryService service;
+        private readonly ICategoryService service;
 
-        public CategoryController(CategoryService service)
+        public CategoryController(ICategoryService service)
         {
             this.service = service;
         }

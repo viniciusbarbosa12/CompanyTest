@@ -6,7 +6,7 @@ using Models.Utils;
 
 namespace Services.CategoryService
 {
-    public class CategoryService
+    public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository repository;
 
