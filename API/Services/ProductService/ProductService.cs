@@ -62,69 +62,82 @@ namespace Services.ProductService
         {
             try
             {
-                isValid(ProductDTO);
+                ValidateProductDTO(ProductDTO);
 
-                var product = new Product
-                {
-                    Name = ProductDTO.Name,
-                    Description = ProductDTO.Description,
-                    Price = ProductDTO.Price,
-                    CategoryId = ProductDTO.CategoryId
-                };
+                var product = MapProductDTOToProduct(ProductDTO);
 
-                var result = await repository.Create(product);
+                var createdProduct = await repository.Create(product);
                 await repository.SaveChanges();
 
-                return await Task.FromResult(new Response(result));
-            }catch(Exception e)
-            {
-                return await Task.FromResult(new Response(false, e.Message));
-
+                return new Response(createdProduct);
             }
-
-
+            catch (Exception e)
+            {
+                return new Response(false, e.Message);
+            }
         }
 
-        private void isValid(ProductDTO productDTO)
+        private void ValidateProductDTO(ProductDTO productDTO)
         {
             if (string.IsNullOrWhiteSpace(productDTO.Name))
             {
-                throw new ArgumentException("Name is required");
+                throw new ArgumentException("Name is required", nameof(productDTO.Name));
             }
 
             if (string.IsNullOrWhiteSpace(productDTO.Description))
             {
-                throw new ArgumentException("Description is required");
+                throw new ArgumentException("Description is required", nameof(productDTO.Description));
             }
 
             if (productDTO.Price <= 0)
             {
-                throw new ArgumentException("Price must be greater than 0");
+                throw new ArgumentException("Price must be greater than 0", nameof(productDTO.Price));
             }
 
             if (productDTO.CategoryId == Guid.Empty)
             {
-                throw new ArgumentException("Invalid CategoryId");
+                throw new ArgumentException("Invalid CategoryId", nameof(productDTO.CategoryId));
             }
         }
 
-        public async Task<Response> Update(ProductDTO ProductDTO)
+        private Product MapProductDTOToProduct(ProductDTO productDTO)
         {
+            return new Product
+            {
+                Name = productDTO.Name,
+                Description = productDTO.Description,
+                Price = productDTO.Price,
+                CategoryId = productDTO.CategoryId
+            };
+        }
 
-            var product = repository.GetById(ProductDTO.Id.Value);
-            if (product is null)
-                return await Task.FromResult(new Response(false, "product is not found"));
+        public async Task<Response> Update(ProductDTO productDTO)
+        {
+            try
+            {
+                if (productDTO == null || !productDTO.Id.HasValue)
+                {
+                    return new Response(false, "ProductDTO or its Id is null");
+                }
 
+                var existingProduct = repository.GetById(productDTO.Id.Value);
+                if (existingProduct == null)
+                {
+                    return new Response(false, "Product not found");
+                }
 
-            product.Price = ProductDTO.Price;
-            product.Description = ProductDTO.Description;
-            product.Name = ProductDTO.Name;
+                existingProduct.Price = productDTO.Price;
+                existingProduct.Description = productDTO.Description;
+                existingProduct.Name = productDTO.Name;
 
-            var result = repository.Update(product);
-            await repository.SaveChanges();
-
-            return await Task.FromResult(new Response(result));
-
+                repository.Update(existingProduct);
+                await repository.SaveChanges();
+                return new Response(existingProduct);
+            }
+            catch (Exception e)
+            {
+                return new Response(false, e.Message);
+            }
         }
 
 

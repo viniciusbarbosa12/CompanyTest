@@ -24,13 +24,13 @@ namespace API.Controllers
         {
             try
             {
-                var products = await service.GetAll();
+                var result = await service.GetAll();
 
-                if (!products.IsOk)
-                    return NotFound(products);
+                if (!result.IsOk)
+                    return NotFound();
 
 
-                return Ok(products);
+                return result.IsOk ? Ok(result) : BadRequest(result.Message);
             }
             catch (Exception ex)
             {
@@ -44,12 +44,12 @@ namespace API.Controllers
         {
             try
             {
-                var products = await service.GetAllPaginated(pagination);
+                var result = await service.GetAllPaginated(pagination);
 
-                if (!products.IsOk)
-                    return NotFound(products);
+                if (!result.IsOk)
+                    return NotFound();
 
-                return Ok(products.Result);
+                return result.IsOk ? Ok(result) : BadRequest(result.Message);
             }
             catch (Exception ex)
             {
@@ -63,13 +63,13 @@ namespace API.Controllers
         {
             try
             {
-                var product = await service.GetById(id);
+                var result = await service.GetById(id);
 
-                if (product == null)
+                if (result == null)
                     return NotFound();
 
 
-                return Ok(product);
+                return result.IsOk ? Ok(result) : BadRequest(result.Message);
             }
             catch (Exception ex)
             {
@@ -103,14 +103,9 @@ namespace API.Controllers
         {
             try
             {
-                if (product.Id == Guid.Empty || product == null)
-                {
-                    return BadRequest("Invalid id or category data.");
-                }
-
                 var result = await service.Update(product);
 
-                return Ok(result);
+                return result.IsOk ? Ok(result) : BadRequest(result.Message);
             }
             catch (Exception ex)
             {
