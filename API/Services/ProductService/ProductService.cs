@@ -62,8 +62,8 @@ namespace Services.ProductService
         {
             try
             {
-                if(!isValid(ProductDTO)) return await Task.FromResult(new Response(false, "Params Invalid")); ;
-                
+                isValid(ProductDTO);
+
                 var product = new Product
                 {
                     Name = ProductDTO.Name,
@@ -85,29 +85,27 @@ namespace Services.ProductService
 
         }
 
-        private bool isValid(ProductDTO productDTO)
+        private void isValid(ProductDTO productDTO)
         {
-            bool isValid = true;
             if (string.IsNullOrWhiteSpace(productDTO.Name))
             {
-                isValid = false;
+                throw new ArgumentException("Name is required");
             }
 
             if (string.IsNullOrWhiteSpace(productDTO.Description))
             {
-                isValid = false;
+                throw new ArgumentException("Description is required");
             }
 
             if (productDTO.Price <= 0)
             {
-                isValid = false;
+                throw new ArgumentException("Price must be greater than 0");
             }
 
-            if (Guid.Empty == productDTO.CategoryId)
+            if (productDTO.CategoryId == Guid.Empty)
             {
-                isValid = false;
+                throw new ArgumentException("Invalid CategoryId");
             }
-            return isValid;
         }
 
         public async Task<Response> Update(ProductDTO ProductDTO)

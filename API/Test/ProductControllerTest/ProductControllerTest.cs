@@ -107,22 +107,22 @@ namespace Test.ProductControllerTest
         public async Task Get_Returns_BadRequestResult_Create_Validations()
         {
             // Arrange
-            var product = new ProductDTO
-            {
+            var invalidProduct = new ProductDTO(); // Create an invalid ProductDTO object with missing required fields
 
-            };
-            mockService.Setup(service => service.Create(product)).ReturnsAsync(new Response(false, "Params Invalid"));
+            // Setup the mock service to return a Response indicating invalid parameters
+            mockService.Setup(service => service.Create(invalidProduct))
+                       .ReturnsAsync(new Response(false, "Name is required"));
 
             var controller = new ProductController(mockService.Object);
 
             // Act
-            var result = await controller.Create(product);
+            var result = await controller.Create(invalidProduct);
 
             // Assert
-            var okResult = Assert.IsType<BadRequestObjectResult>(result.Result);
-            var model = Assert.IsAssignableFrom<string>(okResult.Value);
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+            var errorMessage = Assert.IsAssignableFrom<string>(badRequestResult.Value);
 
-            Assert.Equal("Params Invalid", model);
+            Assert.Equal("Name is required", errorMessage);
         }
     }
 }
