@@ -28,7 +28,6 @@ namespace Models.entities
 
         public Guid CategoryId { get; set; }
 
-        [JsonIgnore]
         public Category? Category { get; set; }
     }
 }

@@ -30,7 +30,12 @@ namespace Services.CategoryService
         public async Task<Response> GetAllPaginated(Pagination pagination)
         {
             var categories = repository.GetAll(item => item.Active == true && !item.DeletedAt.HasValue, pagination);
-            return await Task.FromResult(new Response(categories));
+            return await Task.FromResult(new Response(new
+            {
+                Itens = categories.Itens.ToList(),
+                categories.TotalItens,
+                categories.TotalPages
+            }));
         }
 
 

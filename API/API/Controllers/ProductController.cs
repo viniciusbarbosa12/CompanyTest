@@ -1,7 +1,10 @@
 ﻿using Dao.Context;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Models.DTO;
 using Models.entities;
+using Models.Utils;
+using Services.ProductService;
 
 namespace API.Controllers
 {
@@ -9,26 +12,44 @@ namespace API.Controllers
     [Route("[controller]")]
     public class ProductController : ControllerBase
     {
-        private readonly AppDbContext _context;
-
-        public ProductController(AppDbContext context)
+        private readonly IProductService service;
+        public ProductController(IProductService service)
         {
-            this._context = context;
+            this.service = service;
         }
 
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> Get()
+        public async Task<ActionResult<Response>> Get()
         {
             try
             {
-                var products = await _context.Products.AsNoTracking().ToListAsync();
+                var products = await service.GetAll();
 
-                if (products == null || products.Count == 0)
-                    return NotFound();
+                if (!products.IsOk)
+                    return NotFound(products);
 
 
                 return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred: " + ex.Message);
+            }
+        }
 
+
+        [HttpPost("getAllPaginated")]
+        public async Task<ActionResult<Response>> Get(Pagination pagination)
+        {
+            try
+            {
+                var products = await service.GetAllPaginated(pagination);
+
+                if (!products.IsOk)
+                    return NotFound(products);
+
+                return Ok(products.Result);
             }
             catch (Exception ex)
             {
@@ -38,17 +59,17 @@ namespace API.Controllers
 
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<Product>>> GetById(Guid id)
+        public async Task<ActionResult<Response>> GetById(Guid id)
         {
             try
             {
-                var products = await _context.Products.AsNoTracking().FirstOrDefaultAsync(item => item.Id.Equals(id));
+                var product = await service.GetById(id);
 
-                if (products == null)
+                if (product == null)
                     return NotFound();
 
 
-                return Ok(products);
+                return Ok(product);
             }
             catch (Exception ex)
             {
@@ -57,24 +78,19 @@ namespace API.Controllers
         }
 
 
-
-
-
         [HttpPost]
-        public async Task<ActionResult<Product>> Create(Product product)
+        public async Task<ActionResult<Response>> Create(ProductDTO product)
         {
             try
             {
                 if (product == null)
                 {
-                    return BadRequest("Category data is null.");
+                    return BadRequest("Product params is null");
                 }
 
-                await _context.Products.AddAsync(product);
-                await _context.SaveChangesAsync();
+                var result = await service.Create(product);
 
-                return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
-
+                return result.IsOk ? StatusCode(201, result) : BadRequest(result.Message);
             }
             catch (Exception ex)
             {
@@ -82,39 +98,25 @@ namespace API.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, Product product)
+        [HttpPut]
+        public async Task<ActionResult<Response>> Update(ProductDTO product)
         {
             try
             {
-                if (id == Guid.Empty || product == null)
+                if (product.Id == Guid.Empty || product == null)
                 {
                     return BadRequest("Invalid id or category data.");
                 }
 
-                var existingProduct = await _context.Products.FirstOrDefaultAsync(c => c.Id == id);
+                var result = await service.Update(product);
 
-                if (existingProduct == null)
-                {
-                    return NotFound($"Category with id {id} not found.");
-                }
-
-                existingProduct.Name = product.Name;
-                existingProduct.Price = product.Price;
-                existingProduct.Description = product.Description;
-                existingProduct.CategoryId = product.CategoryId;
-
-                _context.Products.Update(existingProduct);
-                await _context.SaveChangesAsync();
-
-                return Ok(existingProduct);
-
-
+                return Ok(result);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, "An error occurred: " + ex.Message);
             }
+
         }
     }
 }

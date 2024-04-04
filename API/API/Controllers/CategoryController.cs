@@ -79,25 +79,6 @@ namespace API.Controllers
         }
 
 
-        //[HttpGet("products/{id}")]
-        //public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesWithProducts(Guid id)
-        //{
-        //    try
-        //    {
-        //        var categories = _context.Categories.AsNoTracking().Include(p => p.Products).Where(item => item.Id.Equals(id)).ToListAsync();
-
-        //        if (categories == null)
-        //            return NotFound();
-
-
-        //        return Ok(categories);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, "An error occurred: " + ex.Message);
-        //    }
-        //}
-
         [HttpPost]
         public async Task<ActionResult<Response>> Create(CategoryDTO category)
         {

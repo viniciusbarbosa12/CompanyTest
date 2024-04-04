@@ -1,6 +1,8 @@
 ﻿using Dao.Context;
+using Microsoft.EntityFrameworkCore;
 using Models.Utils;
 using System.Linq.Expressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Dao.Config
 {
@@ -36,39 +38,40 @@ namespace Dao.Config
             }
         }
 
-        public (IQueryable<T> Itens, int TotalPaginas, int TotalItens) GetAll(Pagination pagination)
+        public (IQueryable<T> Itens, int TotalPages, int TotalItens) GetAll(Pagination pagination)
         {
             var result = Context.Set<T>();
             return ApplyParams(pagination, result);
         }
 
-        public (IQueryable<T> Itens, int TotalPaginas, int TotalItens) GetAll(Expression<Func<T, bool>> expression,
-            Pagination pagination)
+        public (IQueryable<T> Itens, int TotalPages, int TotalItens) GetAll(Expression<Func<T, bool>> expression,
+            Pagination pagination, params Expression<Func<T, object>>[]? includes)
         {
             var result = Context.Set<T>().Where(expression);
+            result = includes?.Aggregate(result, (current, includeProperty) => current.Include(includeProperty));
             return ApplyParams(pagination, result);
         }
 
-        private (IQueryable<T> Itens, int TotalPaginas, int TotalItens) ApplyParams(Pagination pagination, IQueryable<T> result)
+        private (IQueryable<T> Itens, int TotalPages, int TotalItens) ApplyParams(Pagination pagination, IQueryable<T> result)
         {
             var lista = ApplyOrder(result, pagination.Order, pagination.Desc);
-            (IQueryable<T> Itens, int TotalPaginas, int TotalItens) = ApplyPagination(lista, pagination.Page, pagination.PageSize);
-            return (Itens.ToList().AsQueryable(), TotalPaginas, TotalItens);
+            (IQueryable<T> Itens, int TotalPages, int TotalItens) = ApplyPagination(lista, pagination.Page, pagination.PageSize);
+            return (Itens.ToList().AsQueryable(), TotalPages, TotalItens);
         }
 
-        private (IQueryable<T> Items, int TotalPaginas, int TotalItens) ApplyPagination(IQueryable<T> lista, int pagina, int tamanhoPagina)
+        private (IQueryable<T> Items, int TotalPages, int TotalItens) ApplyPagination(IQueryable<T> lista, int pagina, int tamanhoPagina)
         {
             if (pagina == 0) pagina = 1;
             if (tamanhoPagina == 0) tamanhoPagina = 10;
 
             var totalItens = lista.Count();
-            var totalPaginas = (double)totalItens / tamanhoPagina;
-            totalPaginas = Math.Ceiling(totalPaginas);
+            var TotalPages = (double)totalItens / tamanhoPagina;
+            TotalPages = Math.Ceiling(TotalPages);
 
             pagina = pagina < 1 ? 1 : pagina;
 
             var skip = (pagina - 1) * tamanhoPagina;
-            return (lista.Skip(skip).Take(tamanhoPagina), (int)totalPaginas, totalItens);
+            return (lista.Skip(skip).Take(tamanhoPagina), (int)TotalPages, totalItens);
         }
 
 

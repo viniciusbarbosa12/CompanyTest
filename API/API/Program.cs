@@ -6,6 +6,7 @@ using Dao.Repositories.ProductRepository;
 using Microsoft.EntityFrameworkCore;
 using Models.entities;
 using Services.CategoryService;
+using Services.ProductService;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,9 +24,32 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(mySqlCon
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+});
+var OrigensComAcessoPermitido = "_origensComAcessoPermitido";
+
+builder.Services.AddCors(options =>
+   options.AddPolicy(name: OrigensComAcessoPermitido,
+   policy =>
+   {
+       policy.WithOrigins("http://www.apirequest.io");
+   })
+);
 
 
 var app = builder.Build();
+app.UseCors("CorsPolicy");
+app.UseCors(OrigensComAcessoPermitido);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -33,6 +57,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
+
 
 app.UseHttpsRedirection();
 

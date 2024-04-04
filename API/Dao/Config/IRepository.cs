@@ -19,11 +19,11 @@ namespace Dao.Config
 
         //Pagination is a utility class designed to streamline the implementation of paginated queries
         //enhancing efficiency and simplifying requests for retrieving all items
-        (IQueryable<T> Itens, int TotalPaginas, int TotalItens) GetAll(Pagination pagination);
+        (IQueryable<T> Itens, int TotalPages, int TotalItens) GetAll(Pagination pagination);
 
         //Implemented a new GetAll method utilizing expressions to facilitate custom filters and pagination
         //enhancing flexibility and efficiency in data retrieval operations
-        (IQueryable<T> Itens, int TotalPaginas, int TotalItens) GetAll(Expression<Func<T, bool>> expression, Pagination pagination);
+        (IQueryable<T> Itens, int TotalPages, int TotalItens) GetAll(Expression<Func<T, bool>> expression, Pagination pagination, params Expression<Func<T, object>>[]? includes);
 
 
         T GetById(Guid id);
