@@ -84,13 +84,7 @@ namespace API.Controllers
         {
             try
             {
-                if (category == null)
-                {
-                    return BadRequest("Category data is null.");
-                }
-
                 var result = await service.Create(category);
-
                 return CreatedAtAction(nameof(GetById), new { result.Result }, result);
             }
             catch (Exception ex)
@@ -104,11 +98,6 @@ namespace API.Controllers
         {
             try
             {
-                if (categoryDto.Id == Guid.Empty || categoryDto == null)
-                {
-                    return BadRequest("Invalid id or category data.");
-                }
-
                 var result = await service.Update(categoryDto);
 
                 return Ok(result);

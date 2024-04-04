@@ -83,11 +83,6 @@ namespace API.Controllers
         {
             try
             {
-                if (product == null)
-                {
-                    return BadRequest("Product params is null");
-                }
-
                 var result = await service.Create(product);
 
                 return result.IsOk ? StatusCode(201, result) : BadRequest(result.Message);

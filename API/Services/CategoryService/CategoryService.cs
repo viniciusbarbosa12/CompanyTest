@@ -47,6 +47,8 @@ namespace Services.CategoryService
 
         public async Task<Response> Create(CategoryDTO categoryDTO)
         {
+            ValidateCategoryDTO(categoryDTO);
+
             var category = new Category
             {
                 Name = categoryDTO.Name,
@@ -63,6 +65,12 @@ namespace Services.CategoryService
 
         public async Task<Response> Update(CategoryDTO categoryDTO)
         {
+            ValidateCategoryDTO(categoryDTO);
+
+            if (!categoryDTO.Id.HasValue)
+            {
+                throw new ArgumentException("Category is invalid");
+            }
 
             var category = repository.GetById(categoryDTO.Id.Value);
             if (category is null)
@@ -79,6 +87,23 @@ namespace Services.CategoryService
 
         }
 
+        private void ValidateCategoryDTO(CategoryDTO categoryDTO)
+        {
+            if (categoryDTO is null)
+            {
+                throw new ArgumentException("Product is invalid");
+            }
+
+            if (string.IsNullOrWhiteSpace(categoryDTO.Name))
+            {
+                throw new ArgumentException("Name is required", nameof(categoryDTO.Name));
+            }
+
+            if (string.IsNullOrWhiteSpace(categoryDTO.Code))
+            {
+                throw new ArgumentException("Code is required", nameof(categoryDTO.Code));
+            }
+        }
 
         public async Task<Response> Delete(CategoryDTO categoryDTO)
         {

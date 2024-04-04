@@ -25,37 +25,64 @@ namespace Services.ProductService
 
         public async Task<Response> GetAll()
         {
-            var products = repository.GetAll(item => item.Active && !item.DeletedAt.HasValue);
+            try
+            {
+                var products = repository.GetAll(item => item.Active && !item.DeletedAt.HasValue);
 
-            if (products is null)
-                return await Task.FromResult(new Response(false, "product is not found"));
+                if (products is null)
+                    return await Task.FromResult(new Response(false, "Products not found"));
 
-            return await Task.FromResult(new Response(products));
+                return await Task.FromResult(new Response(products));
+            }
+            catch (Exception e)
+            {
+                return new Response(false, e.Message);
+
+            }
         }
 
 
         public async Task<Response> GetAllPaginated(Pagination pagination)
         {
-            var products = repository.GetAll(item => item.Active == true && !item.DeletedAt.HasValue, pagination, item => item.Category);
-            return await Task.FromResult(new Response(new
+            try
             {
-                Itens = products.Itens.ToList().Select(item => new {
-                    item.Name,
-                    item.Price,
-                    item.Description,
-                    Category = item.Category?.Name,
-                    item.Id
-                }),
-                products.TotalItens,
-                products.TotalPages
-            }));
+                var products = repository.GetAll(item => item.Active == true && !item.DeletedAt.HasValue, pagination, item => item.Category);
+
+                if (products.Itens is null)
+                    return await Task.FromResult(new Response(false, "Products not found"));
+
+                return await Task.FromResult(new Response(new
+                {
+                    Itens = products.Itens.ToList().Select(item => new
+                    {
+                        item.Name,
+                        item.Price,
+                        item.Description,
+                        Category = item.Category?.Name,
+                        item.Id
+                    }),
+                    products.TotalItens,
+                    products.TotalPages
+                }));
+            }
+            catch (Exception e)
+            {
+                return new Response(false, e.Message);
+            }
         }
 
 
         public async Task<Response> GetById(Guid id)
         {
-            var product = repository.GetById(id);
-            return await Task.FromResult(new Response(product));
+            try
+            {
+                return await Task.FromResult(new Response(repository.GetById(id)));
+            }
+            catch (Exception e)
+            {
+                return new Response(false, e.Message);
+
+            }
         }
 
         public async Task<Response> Create(ProductDTO ProductDTO)
@@ -79,6 +106,11 @@ namespace Services.ProductService
 
         private void ValidateProductDTO(ProductDTO productDTO)
         {
+            if (productDTO is null)
+            {
+                throw new ArgumentException("Product is invalid");
+            }
+
             if (string.IsNullOrWhiteSpace(productDTO.Name))
             {
                 throw new ArgumentException("Name is required", nameof(productDTO.Name));
@@ -115,9 +147,11 @@ namespace Services.ProductService
         {
             try
             {
-                if (productDTO == null || !productDTO.Id.HasValue)
+                ValidateProductDTO(productDTO);
+
+                if (!productDTO.Id.HasValue)
                 {
-                    return new Response(false, "ProductDTO or its Id is null");
+                    throw new ArgumentException("Product is invalid");
                 }
 
                 var existingProduct = repository.GetById(productDTO.Id.Value);
