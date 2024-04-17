@@ -1,13 +1,12 @@
-﻿using Dao.Context;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Models.DTO;
-using Models.entities;
 using Models.Utils;
 using Services.ProductService;
 
 namespace API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class ProductController : ControllerBase
@@ -49,7 +48,7 @@ namespace API.Controllers
                 if (!result.IsOk)
                     return NotFound();
 
-                return result.IsOk ? Ok(result) : BadRequest(result.Message);
+                return result.IsOk ? Ok(result.Result) : BadRequest(result.Message);
             }
             catch (Exception ex)
             {
